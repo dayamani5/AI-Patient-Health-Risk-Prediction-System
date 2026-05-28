@@ -1,0 +1,172 @@
+```html
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon bg-blue">👥</div>
+        <div>
+            <p>Total Patients</p>
+            <h3>{{ total_count }}</h3>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon bg-green">✅</div>
+        <div>
+            <p>Low Risk</p>
+            <h3>{{ low_count }}</h3>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon bg-yellow">⚠️</div>
+        <div>
+            <p>Moderate Risk</p>
+            <h3>{{ moderate_count }}</h3>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon bg-red">🚨</div>
+        <div>
+            <p>High Risk</p>
+            <h3>{{ high_count }}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-card shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h3 class="fw-bold mb-1">Patient Records</h3>
+            <p class="text-muted mb-0">Search, filter, update, delete, and analyze patient health data.</p>
+        </div>
+
+        <a href="{{ url_for('add_patient') }}" class="btn btn-primary px-4">
+            + Add Record
+        </a>
+    </div>
+
+    <form method="GET" action="{{ url_for('index') }}" class="filter-box mb-4">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <input
+                    type="text"
+                    name="search"
+                    class="form-control"
+                    placeholder="Search by name or email"
+                    value="{{ search }}"
+                >
+            </div>
+
+            <div class="col-md-4">
+                <select name="risk" class="form-select">
+                    <option value="">All Risk Levels</option>
+                    <option value="Low" {% if risk_filter == "Low" %}selected{% endif %}>Low Risk</option>
+                    <option value="Moderate" {% if risk_filter == "Moderate" %}selected{% endif %}>Moderate Risk</option>
+                    <option value="High" {% if risk_filter == "High" %}selected{% endif %}>High Risk</option>
+                </select>
+            </div>
+
+            <div class="col-md-2 d-grid">
+                <button class="btn btn-dark">Filter</button>
+            </div>
+        </div>
+    </form>
+
+    {% if patients %}
+        <div class="table-responsive">
+            <table class="table custom-table align-middle">
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>DOB</th>
+                        <th>Email</th>
+                        <th>Glucose</th>
+                        <th>Haemoglobin</th>
+                        <th>Cholesterol</th>
+                        <th>Risk</th>
+                        <th>AI Remarks</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for patient in patients %}
+                    <tr>
+                        <td>
+                            <div class="patient-name">{{ patient.full_name }}</div>
+                        </td>
+
+                        <td>{{ patient.dob }}</td>
+                        <td>{{ patient.email }}</td>
+
+                        <td>
+                            <span class="value-pill glucose">{{ patient.glucose }}</span>
+                        </td>
+
+                        <td>
+                            <span class="value-pill hb">{{ patient.haemoglobin }}</span>
+                        </td>
+
+                        <td>
+                            <span class="value-pill chol">{{ patient.cholesterol }}</span>
+                        </td>
+
+                        <td>
+                            {% if patient.risk_level == "Low" %}
+                                <span class="risk-badge risk-low">Low</span>
+                            {% elif patient.risk_level == "Moderate" %}
+                                <span class="risk-badge risk-moderate">Moderate</span>
+                            {% else %}
+                                <span class="risk-badge risk-high">High</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="remarks-cell" style="white-space: pre-line;">
+                            {{ patient.remarks }}
+                        </td>
+
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a
+                                    href="{{ url_for('edit_patient', patient_id=patient.id) }}"
+                                    class="btn btn-sm btn-outline-warning"
+                                >
+                                    Edit
+                                </a>
+
+                                <form
+                                    action="{{ url_for('delete_patient', patient_id=patient.id) }}"
+                                    method="POST"
+                                    onsubmit="return confirm('Are you sure you want to delete this record?');"
+                                >
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h4>No records found</h4>
+            <p>Add a patient record or change your search/filter criteria.</p>
+
+            <a href="{{ url_for('add_patient') }}" class="btn btn-primary px-4">
+                Add Patient
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+```
